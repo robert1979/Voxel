@@ -40,25 +40,24 @@ public class ChunkRenderer : MonoBehaviour
         this.ChunkData = data;
     }
 
-    private void RenderMesh(MeshData meshData)
+    private void RenderMesh( MeshData[] meshDataArray)
     {
         mesh.Clear();
 
         mesh.subMeshCount = 2;
-        mesh.vertices = meshData.vertices.Concat(meshData.waterMesh.vertices).ToArray();
+        mesh.vertices = meshDataArray[0].vertices.Concat(meshDataArray[1].vertices).ToArray();
 
-        mesh.SetTriangles(meshData.triangles.ToArray(), 0);
-        mesh.SetTriangles(meshData.waterMesh.triangles.Select(val => val + meshData.vertices.Count).ToArray(), 1);
+        mesh.SetTriangles(meshDataArray[0].triangles, 0);
+        mesh.SetTriangles(meshDataArray[1].triangles.Select(val => val + meshDataArray[0].vertices.Count).ToArray(), 1);
 
-        mesh.uv = meshData.uv.Concat(meshData.waterMesh.uv).ToArray();
+        mesh.uv = meshDataArray[0].uv.Concat(meshDataArray[1].uv).ToArray();
         mesh.RecalculateNormals();
 
         meshCollider.sharedMesh = null;
         Mesh collisionMesh = new Mesh();
-        collisionMesh.vertices = meshData.colliderVertices.ToArray();
-        collisionMesh.triangles = meshData.colliderTriangles.ToArray();
+        collisionMesh.vertices = meshDataArray[0].colliderVertices.ToArray();
+        collisionMesh.triangles = meshDataArray[0].colliderTriangles.ToArray();
         collisionMesh.RecalculateNormals();
-
         meshCollider.sharedMesh = collisionMesh;
     }
 
@@ -67,7 +66,7 @@ public class ChunkRenderer : MonoBehaviour
         RenderMesh(Chunk.GetChunkMeshData(ChunkData));
     }
 
-    public void UpdateChunk(MeshData data)
+    public void UpdateChunk(MeshData[] data)
     {
         RenderMesh(data);
     }

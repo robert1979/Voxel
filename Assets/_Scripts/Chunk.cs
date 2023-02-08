@@ -83,14 +83,21 @@ public static class Chunk
         };
     }
 
-    public static MeshData GetChunkMeshData(ChunkData chunkData)
+    public static MeshData[] GetChunkMeshData(ChunkData chunkData)
     {
-        MeshData meshData = new MeshData(true);
+        MeshData meshData = MeshData.Create();
+        MeshData waterMeshData = MeshData.Create();
 
-        LoopThroughTheBlocks(chunkData, (x, y, z) => meshData = BlockHelper.GetMeshData(chunkData, x, y, z, meshData, chunkData.blocks[GetIndexFromPosition(chunkData, x, y, z)]));
+        for (int index = 0; index < chunkData.blocks.Length; index++)
+        {
+            var pos = GetPostitionFromIndex(chunkData, index);
+            meshData = BlockHelper.GetMeshData(chunkData,
+                pos.x, pos.y, pos.z,
+                meshData,waterMeshData,
+                chunkData.blocks[GetIndexFromPosition(chunkData, pos.x, pos.y, pos.z)]);
+        }
 
-
-        return meshData;
+        return  new MeshData[]{meshData, waterMeshData};
     }
 
     internal static Vector3Int ChunkPositionFromBlockCoords(World world, int x, int y, int z)

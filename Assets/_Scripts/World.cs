@@ -36,17 +36,17 @@ public class World : MonoBehaviour
 
         foreach (ChunkData data in chunkDataDictionary.Values)
         {
-            MeshData meshData = Chunk.GetChunkMeshData(data);
+            MeshData[] meshDataArray = Chunk.GetChunkMeshData(data);
             GameObject chunkObject = Instantiate(chunkPrefab, data.worldPosition, Quaternion.identity);
             ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
             chunkDictionary.Add(data.worldPosition, chunkRenderer);
             chunkRenderer.InitializeChunk(data);
-            chunkRenderer.UpdateChunk(meshData);
+            chunkRenderer.UpdateChunk(meshDataArray);
 
         }
     }
 
-        private void GenerateVoxels(ChunkData data)
+    private void GenerateVoxels(ChunkData data)
     {
         for (int x = 0; x < data.chunkSize; x++)
         {
