@@ -61,13 +61,13 @@ public struct MeshData
     public void GetFaceDataIn(Direction direction,int x, int y, int z, BlockType blockType)
     {
         GetFaceVertices(direction, x, y, z,blockType);
-        AddQuadTriangles(BlockDataManager.blockTextureDataDictionary[blockType].generatesCollider);
+        AddQuadTriangles(BlockDataManager.lookUpList[(int)blockType].generatesCollider);
         AddFaceUVs(direction, blockType);
     }
     
     private void GetFaceVertices(Direction direction, int x, int y, int z, BlockType blockType)
     {
-        var generatesCollider = BlockDataManager.blockTextureDataDictionary[blockType].generatesCollider;
+        var generatesCollider = BlockDataManager.lookUpList[(int)blockType].generatesCollider;
         
         var faceVertexIndices = BlockHelper.FaceIndices[(int)direction];
         for (int i = 0; i < 4; i++)
@@ -105,9 +105,9 @@ public struct MeshData
     {
         return direction switch
         {
-            Direction.up => BlockDataManager.blockTextureDataDictionary[blockType].up,
-            Direction.down => BlockDataManager.blockTextureDataDictionary[blockType].down,
-            _ => BlockDataManager.blockTextureDataDictionary[blockType].side
+            Direction.up => BlockDataManager.lookUpList[(int)blockType].up,
+            Direction.down => BlockDataManager.lookUpList[(int)blockType].down,
+            _ => BlockDataManager.lookUpList[(int)blockType].side
         };
     }
 

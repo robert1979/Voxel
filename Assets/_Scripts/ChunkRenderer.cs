@@ -44,10 +44,7 @@ public class ChunkRenderer : MonoBehaviour
     private void RenderMesh( MeshData[] meshDataArray)
     {
         mesh.Clear();
-
-
         mesh.subMeshCount = 2;
-        
         var List = new NativeArray<Vector3>(10,Allocator.Temp);
   
         var vList = new List<Vector3Int>();

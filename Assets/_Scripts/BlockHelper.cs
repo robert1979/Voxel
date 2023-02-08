@@ -47,7 +47,7 @@ public static class BlockHelper
             var neighbourBlockCoordinates = new Vector3Int(x, y, z) + direction.GetVector();
             var neighbourBlockType = Chunk.GetBlockFromChunkCoordinates(chunk, neighbourBlockCoordinates);
 
-            if (neighbourBlockType != BlockType.Nothing && BlockDataManager.blockTextureDataDictionary[neighbourBlockType].isSolid == false)
+            if (neighbourBlockType != BlockType.Nothing && BlockDataManager.lookUpList[(int)neighbourBlockType].isSolid == false)
             {
                 if (blockType == BlockType.Water)
                 {

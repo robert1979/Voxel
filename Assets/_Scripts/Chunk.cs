@@ -73,13 +73,13 @@ public static class Chunk
         return x + chunkData.chunkSize * y + chunkData.chunkSize * chunkData.chunkHeight * z;
     }
 
-    public static Vector3Int GetBlockInChunkCoordinates(ChunkData chunkData, Vector3Int pos)
+    public static Vector3Int GetBlockInChunkCoordinates(ChunkData chunkData, Vector3Int worldPos)
     {
         return new Vector3Int
         {
-            x = pos.x - chunkData.worldPosition.x,
-            y = pos.y - chunkData.worldPosition.y,
-            z = pos.z - chunkData.worldPosition.z
+            x = worldPos.x - chunkData.worldPosition.x,
+            y = worldPos.y - chunkData.worldPosition.y,
+            z = worldPos.z - chunkData.worldPosition.z
         };
     }
 
