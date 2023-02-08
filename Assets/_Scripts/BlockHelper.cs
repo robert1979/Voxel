@@ -4,6 +4,28 @@ using UnityEngine;
 
 public static class BlockHelper
 {
+    public static Vector3[] FaceVertices = new[]
+    {
+        new Vector3(1, 1, 1),
+        new Vector3(0, 1, 1),
+        new Vector3(0, 0, 1),
+        new Vector3(1, 0, 1),
+        new Vector3(0, 1, 0),
+        new Vector3(1, 1, 0),
+        new Vector3(1, 0, 0),
+        new Vector3(0, 0, 0),
+    };
+
+    public static int[][] FaceIndices = new[]
+    {
+        new int[]{3,0, 1, 2},
+        new int[]{6,5, 0, 3},
+        new int[]{7,4, 5, 6},
+        new int[]{2,1, 4, 7},
+        new int[]{0,5, 4, 1}, 
+        new int[]{6,3, 2, 7}
+    };
+    
     private static Direction[] directions =
     {
         Direction.backwards,
@@ -27,7 +49,6 @@ public static class BlockHelper
 
             if (neighbourBlockType != BlockType.Nothing && BlockDataManager.blockTextureDataDictionary[neighbourBlockType].isSolid == false)
             {
-
                 if (blockType == BlockType.Water)
                 {
                     if (neighbourBlockType == BlockType.Air)
@@ -48,32 +69,8 @@ public static class BlockHelper
         GetFaceVertices(direction, x, y, z, meshData, blockType);
         meshData.AddQuadTriangles(BlockDataManager.blockTextureDataDictionary[blockType].generatesCollider);
         meshData.uv.AddRange(FaceUVs(direction, blockType));
-
-
         return meshData;
     }
-
-    public static Vector3[] FaceVertices = new[]
-    {
-        new Vector3(1, 1, 1),
-        new Vector3(0, 1, 1),
-        new Vector3(0, 0, 1),
-        new Vector3(1, 0, 1),
-        new Vector3(0, 1, 0),
-        new Vector3(1, 1, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(0, 0, 0),
-    };
-
-    public static int[][] FaceIndices = new[]
-    {
-        new int[]{3,0, 1, 2},
-        new int[]{6,5, 0, 3},
-        new int[]{7,4, 5, 6},
-        new int[]{2,1, 4, 7},
-        new int[]{0,5, 4, 1}, 
-        new int[]{6,3, 2, 7}
-    };
 
     public static void GetFaceVertices(Direction direction, int x, int y, int z, MeshData meshData, BlockType blockType)
     {
@@ -82,8 +79,12 @@ public static class BlockHelper
         var faceVertexIndices = FaceIndices[(int)direction];
         for (int i = 0; i < 4; i++)
         {
-            var v = FaceVertices[faceVertexIndices[i]];
-            meshData.AddVertex(new Vector3(x,y,z) +v,generatesCollider);
+            var v = FaceVertices[faceVertexIndices[i]] + new Vector3(x,y,z);
+            meshData.vertices.Add(v);
+            if (generatesCollider)
+            {
+                meshData.colliderVertices.Add(v);
+            }
         }
     }
 

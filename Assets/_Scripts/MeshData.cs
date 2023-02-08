@@ -22,15 +22,6 @@ public class MeshData
         }
     }
 
-    public void AddVertex(Vector3 vertex, bool vertexGeneratesCollider)
-    {
-        vertices.Add(vertex);
-        if (vertexGeneratesCollider)
-        {
-            colliderVertices.Add(vertex);
-        }
-    }
-
     public void AddQuadTriangles(bool quadGeneratesCollider)
     {
         triangles.Add(vertices.Count - 4);
