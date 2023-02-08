@@ -4,9 +4,33 @@ using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 
+public struct Vector3Short
+{
+    public short x;
+    public short y;
+    public short z;
+
+    public Vector3Short(int x, int y, int z)
+    {
+        this.x = (short)x;
+        this.y = (short)y;
+        this.z = (short)z;
+    }
+    
+    public Vector3Short(short x, short y, short z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+    
+    public static Vector3Short operator +(Vector3Short a, Vector3Short b)
+        => new Vector3Short(a.x + b.x, a.y + b.y,a.z + b.z);
+}
+
 public struct MeshData
 {
-    public NativeList<Vector3> vertices;
+    public NativeList<Vector3Int> vertices;
     public NativeList<int> triangles;
     public NativeList<Vector2> uv;
 
@@ -17,7 +41,7 @@ public struct MeshData
     {
         return new MeshData()
         {
-            vertices = new NativeList<Vector3>(Allocator.TempJob),
+            vertices = new NativeList<Vector3Int>(Allocator.TempJob),
             triangles = new NativeList<int>(Allocator.TempJob),
             uv = new NativeList<Vector2>(Allocator.TempJob),
             colliderTriangles = new NativeList<int>(Allocator.TempJob),
@@ -48,7 +72,7 @@ public struct MeshData
         var faceVertexIndices = BlockHelper.FaceIndices[(int)direction];
         for (int i = 0; i < 4; i++)
         {
-            var v = BlockHelper.FaceVertices[faceVertexIndices[i]] + new Vector3(x,y,z);
+            var v = BlockHelper.FaceVertices[faceVertexIndices[i]] + new Vector3Int(x,y,z);
             vertices.Add(v);
             if (generatesCollider)
             {

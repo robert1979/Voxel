@@ -50,7 +50,7 @@ public class ChunkRenderer : MonoBehaviour
         
         var List = new NativeArray<Vector3>(10,Allocator.Temp);
   
-        var vList = new List<Vector3>();
+        var vList = new List<Vector3Int>();
         var uvList = new List<Vector2>();
         
         for (int i = 0; i < meshDataArray.Length; i++)
@@ -59,7 +59,7 @@ public class ChunkRenderer : MonoBehaviour
             uvList.AddRange(meshDataArray[i].uv.ToArray());
         }
 
-        mesh.vertices = vList.ToArray();
+        mesh.vertices = vList.Select( v=> new Vector3(v.x,v.y,v.z)).ToArray();
         mesh.uv = uvList.ToArray();
 
         mesh.SetTriangles(meshDataArray[0].triangles.ToArray(), 0);

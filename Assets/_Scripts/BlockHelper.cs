@@ -4,16 +4,16 @@ using UnityEngine;
 
 public static class BlockHelper
 {
-    public static Vector3[] FaceVertices = new[]
+    public static Vector3Int[] FaceVertices = new[]
     {
-        new Vector3(1, 1, 1),
-        new Vector3(0, 1, 1),
-        new Vector3(0, 0, 1),
-        new Vector3(1, 0, 1),
-        new Vector3(0, 1, 0),
-        new Vector3(1, 1, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(0, 0, 0),
+        new Vector3Int(1, 1, 1),
+        new Vector3Int(0, 1, 1),
+        new Vector3Int(0, 0, 1),
+        new Vector3Int(1, 0, 1),
+        new Vector3Int(0, 1, 0),
+        new Vector3Int(1, 1, 0),
+        new Vector3Int(1, 0, 0),
+        new Vector3Int(0, 0, 0),
     };
 
     public static int[][] FaceIndices = new[]
