@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 
@@ -44,19 +45,35 @@ public class ChunkRenderer : MonoBehaviour
     {
         mesh.Clear();
 
+
         mesh.subMeshCount = 2;
-        mesh.vertices = meshDataArray[0].vertices.Concat(meshDataArray[1].vertices).ToArray();
+        
+        var List = new NativeArray<Vector3>(10,Allocator.Temp);
+  
+        var vList = new List<Vector3>();
+        var uvList = new List<Vector2>();
+        
+        for (int i = 0; i < meshDataArray.Length; i++)
+        {
+            vList.AddRange(meshDataArray[i].vertices.ToArray());
+            uvList.AddRange(meshDataArray[i].uv.ToArray());
+        }
 
-        mesh.SetTriangles(meshDataArray[0].triangles, 0);
-        mesh.SetTriangles(meshDataArray[1].triangles.Select(val => val + meshDataArray[0].vertices.Count).ToArray(), 1);
+        mesh.vertices = vList.ToArray();
+        mesh.uv = uvList.ToArray();
 
-        mesh.uv = meshDataArray[0].uv.Concat(meshDataArray[1].uv).ToArray();
-        mesh.RecalculateNormals();
-
+        mesh.SetTriangles(meshDataArray[0].triangles.ToArray(), 0);
+        var triangleList = new List<int>(meshDataArray[1].triangles.ToArray());
+        mesh.SetTriangles(triangleList.Select(val => val + meshDataArray[0].vertices.Length).ToArray(), 1);
+        
         meshCollider.sharedMesh = null;
         Mesh collisionMesh = new Mesh();
         collisionMesh.vertices = meshDataArray[0].colliderVertices.ToArray();
         collisionMesh.triangles = meshDataArray[0].colliderTriangles.ToArray();
+
+        meshDataArray[0].Dispose();
+        meshDataArray[1].Dispose();
+        mesh.RecalculateNormals();
         collisionMesh.RecalculateNormals();
         meshCollider.sharedMesh = collisionMesh;
     }

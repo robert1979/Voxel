@@ -42,7 +42,6 @@ public class World : MonoBehaviour
             chunkDictionary.Add(data.worldPosition, chunkRenderer);
             chunkRenderer.InitializeChunk(data);
             chunkRenderer.UpdateChunk(meshDataArray);
-
         }
     }
 

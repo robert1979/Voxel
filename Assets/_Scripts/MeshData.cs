@@ -1,35 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
 using UnityEngine;
-
-
 
 public struct MeshData
 {
-    public List<Vector3> vertices;
-    public List<int> triangles;
-    public List<Vector2> uv;
+    public NativeList<Vector3> vertices;
+    public NativeList<int> triangles;
+    public NativeList<Vector2> uv;
 
-    public List<Vector3> colliderVertices;
-    public List<int> colliderTriangles;
+    public NativeList<Vector3> colliderVertices;
+    public NativeList<int> colliderTriangles;
 
     public static MeshData Create()
     {
         return new MeshData()
         {
-            vertices = new List<Vector3>(),
-            triangles = new List<int>(),
-            uv = new List<Vector2>(),
-            colliderTriangles = new List<int>(),
-            colliderVertices = new List<Vector3>()
+            vertices = new NativeList<Vector3>(Allocator.TempJob),
+            triangles = new NativeList<int>(Allocator.TempJob),
+            uv = new NativeList<Vector2>(Allocator.TempJob),
+            colliderTriangles = new NativeList<int>(Allocator.TempJob),
+            colliderVertices = new NativeList<Vector3>(Allocator.TempJob)
         };
+    }
+
+    public void Dispose()
+    {
+        vertices.Dispose();
+        triangles.Dispose();
+        uv.Dispose();
+        colliderVertices.Dispose();
+        colliderTriangles.Dispose();
     }
     
     public void GetFaceDataIn(Direction direction,int x, int y, int z, BlockType blockType)
     {
         GetFaceVertices(direction, x, y, z,blockType);
         AddQuadTriangles(BlockDataManager.blockTextureDataDictionary[blockType].generatesCollider);
-        uv.AddRange(FaceUVs(direction, blockType));
+        AddFaceUVs(direction, blockType);
     }
     
     private void GetFaceVertices(Direction direction, int x, int y, int z, BlockType blockType)
@@ -48,9 +57,9 @@ public struct MeshData
         }
     }
     
-    private Vector2[] FaceUVs(Direction direction, BlockType blockType)
+    private void AddFaceUVs(Direction direction, BlockType blockType)
     {
-        Vector2[] UVs = new Vector2[4];
+        var UVs = new NativeArray<Vector2>(4,Allocator.Temp);
         var tilePos = TexturePosition(direction, blockType);
 
         UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
@@ -64,8 +73,8 @@ public struct MeshData
 
         UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
             BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
-
-        return UVs;
+        uv.AddRange(UVs);
+        UVs.Dispose();
     }
     
     private Vector2Int TexturePosition(Direction direction, BlockType blockType)
@@ -80,22 +89,24 @@ public struct MeshData
 
     private void AddQuadTriangles(bool quadGeneratesCollider)
     {
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 3);
-        triangles.Add(vertices.Count - 2);
+        var vCount = vertices.Length;
+        triangles.Add(vCount - 4);
+        triangles.Add(vCount - 3);
+        triangles.Add(vCount - 2);
 
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 2);
-        triangles.Add(vertices.Count - 1);
+        triangles.Add(vCount - 4);
+        triangles.Add(vCount - 2);
+        triangles.Add(vCount - 1);
 
+        var cCount = colliderVertices.Length;
         if (quadGeneratesCollider)
         {
-            colliderTriangles.Add(colliderVertices.Count - 4);
-            colliderTriangles.Add(colliderVertices.Count - 3);
-            colliderTriangles.Add(colliderVertices.Count - 2);
-            colliderTriangles.Add(colliderVertices.Count - 4);
-            colliderTriangles.Add(colliderVertices.Count - 2);
-            colliderTriangles.Add(colliderVertices.Count - 1);
+            colliderTriangles.Add(cCount - 4);
+            colliderTriangles.Add(cCount - 3);
+            colliderTriangles.Add(cCount - 2);
+            colliderTriangles.Add(cCount - 4);
+            colliderTriangles.Add(cCount - 2);
+            colliderTriangles.Add(cCount - 1);
         }
     }
 }
