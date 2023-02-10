@@ -30,7 +30,8 @@ public struct VMeshJob : IJob
     private static int chunkSize => WorldGenerationSettings.chunkSize;
     private static int chunkHeight => WorldGenerationSettings.chunkHeight;
     private static int mapSizeInChunks => WorldGenerationSettings.mapSizeInChunks;
-    
+    public readonly NativeArray<int> FIndices;
+
     public static int[][] FaceIndices = new[]
     {
         new int[]{3,0, 1, 2},
@@ -92,6 +93,16 @@ public struct VMeshJob : IJob
             [4] = Vector3Int.up,
             [5] = Vector3Int.down
         };
+
+        FIndices = new NativeArray<int>(new int[]
+        {
+            3, 0, 1, 2,
+            6, 5, 0, 3,
+            7, 4, 5, 6,
+            2, 1, 4, 7,
+            0, 5, 4, 1,
+            6, 3, 2, 7
+        }, Allocator.Persistent);
     }
     
     public void Dispose()
@@ -104,6 +115,7 @@ public struct VMeshJob : IJob
         FaceVertices.Dispose();
         Directions.Dispose();
         VectorDirections.Dispose();
+        FIndices.Dispose();
     }
     
     public void Execute()
@@ -200,10 +212,10 @@ public struct VMeshJob : IJob
     {
         var generatesCollider = IsSolid(blockType);// BlockDataManager.lookUpList[(int)blockType].generatesCollider;
         
-        var faceVertexIndices = BlockHelper.FaceIndices[(int)direction];
         for (int i = 0; i < 4; i++)
         {
-            var v = FaceVertices[faceVertexIndices[i]] + new Vector3Int(x,y,z);
+            var faceVertexIdx = FIndices[((int)direction*4)+i];
+            var v = FaceVertices[faceVertexIdx] + new Vector3Int(x,y,z);
             vertices.Add(v);
             if (generatesCollider)
             {
