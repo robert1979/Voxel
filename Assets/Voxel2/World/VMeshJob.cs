@@ -135,7 +135,8 @@ public struct VMeshJob : IJob
             var neighbourBlockCoordinates = new Vector3Int(x, y, z) + GetVector(direction);
             var neighbourBlockType = GetBlockFromLocalPos(BlockDataStartIdx, neighbourBlockCoordinates);
         
-            if (neighbourBlockType != BlockType.Nothing && BlockDataManager.lookUpList[(int)neighbourBlockType].isSolid == false)
+            //if (neighbourBlockType != BlockType.Nothing && BlockDataManager.lookUpList[(int)neighbourBlockType].isSolid == false)
+            if (!IsSolid(neighbourBlockType))
             {
                 GetFaceDataIn(direction, x, y, z, blockType);
             }
@@ -189,13 +190,15 @@ public struct VMeshJob : IJob
     public void GetFaceDataIn(Direction direction,int x, int y, int z, BlockType blockType)
     {
         GetFaceVertices(direction, x, y, z,blockType);
-        AddQuadTriangles(BlockDataManager.lookUpList[(int)blockType].generatesCollider);
-        AddFaceUVs(direction, blockType);
+        //AddQuadTriangles(BlockDataManager.lookUpList[(int)blockType].generatesCollider);
+        AddQuadTriangles(IsSolid(blockType));
+
+        //AddFaceUVs(direction, blockType);
     }
     
     private void GetFaceVertices(Direction direction, int x, int y, int z, BlockType blockType)
     {
-        var generatesCollider = BlockDataManager.lookUpList[(int)blockType].generatesCollider;
+        var generatesCollider = IsSolid(blockType);// BlockDataManager.lookUpList[(int)blockType].generatesCollider;
         
         var faceVertexIndices = BlockHelper.FaceIndices[(int)direction];
         for (int i = 0; i < 4; i++)
@@ -208,36 +211,41 @@ public struct VMeshJob : IJob
             }
         }
     }
-    
-    private void AddFaceUVs(Direction direction, BlockType blockType)
+
+    private bool IsSolid(BlockType blockType)
     {
-        var UVs = new NativeArray<Vector2>(4,Allocator.Temp);
-        var tilePos = TexturePosition(direction, blockType);
-
-        UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
-
-        UVs[1] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
-
-        UVs[2] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
-
-        UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
-        uv.AddRange(UVs);
-        UVs.Dispose();
+        return blockType != BlockType.Air && blockType != BlockType.Water && blockType != BlockType.Nothing;
     }
     
-    private Vector2Int TexturePosition(Direction direction, BlockType blockType)
-    {
-        return direction switch
-        {
-            Direction.up => BlockDataManager.lookUpList[(int)blockType].up,
-            Direction.down => BlockDataManager.lookUpList[(int)blockType].down,
-            _ => BlockDataManager.lookUpList[(int)blockType].side
-        };
-    }
+    // private void AddFaceUVs(Direction direction, BlockType blockType)
+    // {
+    //     var UVs = new NativeArray<Vector2>(4,Allocator.Temp);
+    //     var tilePos = TexturePosition(direction, blockType);
+    //
+    //     UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
+    //         BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
+    //
+    //     UVs[1] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
+    //         BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
+    //
+    //     UVs[2] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
+    //         BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
+    //
+    //     UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
+    //         BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
+    //     uv.AddRange(UVs);
+    //     UVs.Dispose();
+    // }
+    
+    // private Vector2Int TexturePosition(Direction direction, BlockType blockType)
+    // {
+    //     return direction switch
+    //     {
+    //         Direction.up => BlockDataManager.lookUpList[(int)blockType].up,
+    //         Direction.down => BlockDataManager.lookUpList[(int)blockType].down,
+    //         _ => BlockDataManager.lookUpList[(int)blockType].side
+    //     };
+    // }
 
     private void AddQuadTriangles(bool quadGeneratesCollider)
     {
