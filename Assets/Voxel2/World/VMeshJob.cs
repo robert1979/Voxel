@@ -4,15 +4,31 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 using UnityEngine;
 
+public struct Byte3
+{
+    public readonly byte x;
+    public readonly byte y;
+    public readonly byte z;
+
+    public Byte3(byte x, byte y, byte z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
+
+[BurstCompile]
 public struct VMeshJob : IJob
 {
     public readonly Vector3Int position;
     public readonly int BlockDataStartIdx;
     public readonly int BlockDataEndIdx;
     private readonly int ChunkBlockDataLength;
-    public readonly NativeArray<Vector3Int> FaceVertices;
+    public readonly NativeArray<Byte3> FaceVertices;
     public readonly NativeArray<Direction> Directions;
     public readonly NativeArray<Vector3Int> VectorDirections;
     
@@ -30,17 +46,7 @@ public struct VMeshJob : IJob
     private static int chunkSize => WorldGenerationSettings.chunkSize;
     private static int chunkHeight => WorldGenerationSettings.chunkHeight;
     private static int mapSizeInChunks => WorldGenerationSettings.mapSizeInChunks;
-    public readonly NativeArray<int> FIndices;
-
-    public static int[][] FaceIndices = new[]
-    {
-        new int[]{3,0, 1, 2},
-        new int[]{6,5, 0, 3},
-        new int[]{7,4, 5, 6},
-        new int[]{2,1, 4, 7},
-        new int[]{0,5, 4, 1}, 
-        new int[]{6,3, 2, 7}
-    };
+    public readonly NativeArray<Byte> FaceIndices;
     
     public VMeshJob(Vector3Int position,
         NativeList<BlockType> worldblockData,
@@ -62,16 +68,16 @@ public struct VMeshJob : IJob
         }
         BlockDataEndIdx = BlockDataStartIdx + ChunkBlockDataLength-1;
         
-        FaceVertices = new  NativeArray<Vector3Int>(8,Allocator.Persistent)
+        FaceVertices = new  NativeArray<Byte3>(8,Allocator.Persistent)
         {
-            [0] = new Vector3Int(1, 1, 1),
-            [1] = new Vector3Int(0, 1, 1),
-            [2] = new Vector3Int(0, 0, 1),
-            [3] = new Vector3Int(1, 0, 1),
-            [4] = new Vector3Int(0, 1, 0),
-            [5] = new Vector3Int(1, 1, 0),
-            [6] = new Vector3Int(1, 0, 0),
-            [7] = new Vector3Int(0, 0, 0),
+            [0] = new Byte3(1, 1, 1),
+            [1] = new Byte3(0, 1, 1),
+            [2] = new Byte3(0, 0, 1),
+            [3] = new Byte3(1, 0, 1),
+            [4] = new Byte3(0, 1, 0),
+            [5] = new Byte3(1, 1, 0),
+            [6] = new Byte3(1, 0, 0),
+            [7] = new Byte3(0, 0, 0),
         };
         
         Directions = new  NativeArray<Direction>(6,Allocator.Persistent)
@@ -94,7 +100,7 @@ public struct VMeshJob : IJob
             [5] = Vector3Int.down
         };
 
-        FIndices = new NativeArray<int>(new int[]
+        FaceIndices = new NativeArray<Byte>(new Byte[]
         {
             3, 0, 1, 2,
             6, 5, 0, 3,
@@ -115,7 +121,7 @@ public struct VMeshJob : IJob
         FaceVertices.Dispose();
         Directions.Dispose();
         VectorDirections.Dispose();
-        FIndices.Dispose();
+        FaceIndices.Dispose();
     }
     
     public void Execute()
@@ -214,8 +220,9 @@ public struct VMeshJob : IJob
         
         for (int i = 0; i < 4; i++)
         {
-            var faceVertexIdx = FIndices[((int)direction*4)+i];
-            var v = FaceVertices[faceVertexIdx] + new Vector3Int(x,y,z);
+            var faceVertexIdx = FaceIndices[((int)direction*4)+i];
+            var fVertices = FaceVertices[faceVertexIdx];
+            var v = new Vector3Int(x + fVertices.x,y + fVertices.y,z + fVertices.z);
             vertices.Add(v);
             if (generatesCollider)
             {

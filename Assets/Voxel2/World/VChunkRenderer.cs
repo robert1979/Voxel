@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Profiling;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
@@ -17,12 +19,13 @@ public class VChunkRenderer : MonoBehaviour
     private JobHandle jobHandle;
     private VMeshJob meshJob;
     private bool hasStarted;
-    
+
     private void Awake()
     {
         mFilter = GetComponent<MeshFilter>();
         mCollider = GetComponent<MeshCollider>();
         mesh = mFilter.mesh;
+ 
     }
 
     public void StartMeshJob(VMeshJob meshJob)

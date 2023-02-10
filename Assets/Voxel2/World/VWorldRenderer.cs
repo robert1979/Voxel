@@ -2,27 +2,38 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 public class VWorldRenderer : MonoBehaviour
 {
     public VChunkRenderer chunkPrefab;
+    static readonly ProfilerMarker myMarker = new ProfilerMarker("MeshBuild");
 
     private VWorldData worldData;
     // Start is called before the first frame update
     void Start()
     {
-        worldData = new VWorldData();
-        worldData.Init();
-        StopWatch.Start();
-        worldData.Generate();
-        StopWatch.End("World Generation took ");
-        
-        StopWatch.Start();
-        RenderWorld(worldData);
-        StopWatch.End("World Rendering took ");
 
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            worldData = new VWorldData();
+            worldData.Init();
+            StopWatch.Start();
+            myMarker.Begin();
+            worldData.Generate();
+            myMarker.End();
+            StopWatch.End("World Generation took ");
+        
+            StopWatch.Start();
+            RenderWorld(worldData);
+            StopWatch.End("World Rendering took ");
+        }
     }
 
     private void RenderWorld(VWorldData worldData)
